@@ -106,7 +106,6 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
             ChannelFuture future = bootstrap.bind(ip,port).sync();
 
             //注册RPC服务器地址
-
             if (serviceRegistry != null){
                 for (String interfaceName : handlerMap.keySet()) {
                     serviceRegistry.register(interfaceName, serviceAddress);
