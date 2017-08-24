@@ -7,9 +7,7 @@ import com.gcr.common.codec.RpcEncoder;
 import com.gcr.common.util.StringUtil;
 import com.gcr.rpc.registry.ServiceRegistry;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -79,23 +77,49 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
 
-        //创建并初始化 Netty 服务端 Bootstrap对象
+        try {
+            //创建并初始化 Netty 服务端 Bootstrap对象
 
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        bootstrap.group(bossGroup, workerGroup);
-        bootstrap.channel(NioServerSocketChannel.class);
-        bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel socketChannel) throws Exception {
-                ChannelPipeline pipeline = socketChannel.pipeline();
-                pipeline.addLast(new RpcDecoder(RpcRequest.class));//解码RPC请求
-                pipeline.addLast(new RpcEncoder(RpcResponse.class)); //编码 RPC 响应
-                pipeline.addLast(new RpcServerHandler(handlerMap)); // 处理RPC 请求
+            ServerBootstrap bootstrap = new ServerBootstrap();
+            bootstrap.group(bossGroup, workerGroup);
+            bootstrap.channel(NioServerSocketChannel.class);
+            bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(SocketChannel socketChannel) throws Exception {
+                    ChannelPipeline pipeline = socketChannel.pipeline();
+                    pipeline.addLast(new RpcDecoder(RpcRequest.class));//解码RPC请求
+                    pipeline.addLast(new RpcEncoder(RpcResponse.class)); //编码 RPC 响应
+                    pipeline.addLast(new RpcServerHandler(handlerMap)); // 处理RPC 请求
 
+                }
+            });
+
+            bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
+            bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+
+            //获取RPC 服务器的IP地址与端口号
+            String[] addressArray = StringUtil.split(serviceAddress, ":");
+            String ip = addressArray[0];
+            int port = Integer.parseInt(addressArray[1]);
+
+            //启动RPC 服务器
+            ChannelFuture future = bootstrap.bind(ip,port).sync();
+
+            //注册RPC服务器地址
+
+            if (serviceRegistry != null){
+                for (String interfaceName : handlerMap.keySet()) {
+                    serviceRegistry.register(interfaceName, serviceAddress);
+                    logger.debug("register service: {} => {}", interfaceName, serviceAddress);
+                }
             }
-        });
-
-
+            logger.debug("server started on port {}", port);
+            // 关闭 RPC 服务器
+            future.channel().closeFuture().sync();
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
     }
 }
 
