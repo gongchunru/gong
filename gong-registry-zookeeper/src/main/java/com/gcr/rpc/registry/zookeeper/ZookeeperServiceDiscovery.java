@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 基于zookeeper的服务发现接口实现
@@ -40,15 +41,26 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery{
             }
             List<String> addressList = zkClient.getChildren(servicePath);
             if (CollectionUtil.isEmpty(addressList)){
-
+                throw new RuntimeException(String.format("cnat not find any address node on path: %s",servicePath));
             }
-
+            //获取address节点
+            String address;
+            int size = addressList.size();
+            if (size == 1){
+                //若只有一个地址，则获取改地址
+                address = addressList.get(0);
+                logger.debug("get only address node:{}",address);
+            }else {
+                //若存在多个地址，则随机获取一个地址
+                address = addressList.get(ThreadLocalRandom.current().nextInt(size));
+                logger.debug("get random address node: {}",address);
+            }
+            //获取address 节点的值
+            String addressPath = servicePath + "/" + address;
+            return zkClient.readData(addressPath);
 
         }finally {
             zkClient.close();
         }
-
-
-        return null;
     }
 }
