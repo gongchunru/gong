@@ -1,5 +1,6 @@
 package com.gcr.common.codec;
 
+import com.gcr.common.util.SerializationUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -35,6 +36,6 @@ public class RpcDecoder extends ByteToMessageDecoder {
 
         byte[] data = new byte[dataLength];
         byteBuf.readBytes(data);
-        list.add(SerializationUtil);
+        list.add(SerializationUtil.deserialize(data, genericClass));
     }
 }
