@@ -11,7 +11,7 @@ public class RpcRequest {
     private String interfaceName;
     private String serviceVersion;
     private String methodName;
-    private Class<?>[] parameterType;
+    private Class<?>[] parameterTypes;
     private Object[] parameters;
 
 
@@ -47,12 +47,12 @@ public class RpcRequest {
         this.methodName = methodName;
     }
 
-    public Class<?>[] getParameterType() {
-        return parameterType;
+    public Class<?>[] getParameterTypes() {
+        return parameterTypes;
     }
 
-    public void setParameterType(Class<?>[] parameterType) {
-        this.parameterType = parameterType;
+    public void setParameterTypes(Class<?>[] parameterTypes) {
+        this.parameterTypes = parameterTypes;
     }
 
     public Object[] getParameters() {

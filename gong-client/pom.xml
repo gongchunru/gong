@@ -12,4 +12,18 @@
     <artifactId>gong-client</artifactId>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>com.gcr.rpc</groupId>
+            <artifactId>gong-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gcr.rpc</groupId>
+            <artifactId>gong-registry-zookeeper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
+
 </project>
