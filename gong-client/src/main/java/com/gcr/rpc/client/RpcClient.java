@@ -48,7 +48,7 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse>{
     }
 
 
-    public RpcResponse send(RpcResponse rpcResponse) throws InterruptedException {
+    public RpcResponse send(RpcRequest request) throws InterruptedException {
 
         EventLoopGroup group = new NioEventLoopGroup();
         try{
