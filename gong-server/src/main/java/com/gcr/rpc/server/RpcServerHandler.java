@@ -63,7 +63,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         //获取反射调用所需参数
         Class<?> serviceClass = serviceBean.getClass();
         String methodName = request.getMethodName();
-        Class<?>[] parameterTypes = request.getParameterType();
+        Class<?>[] parameterTypes = request.getParameterTypes();
         Object[] parameters = request.getParameters();
 
         //执行反射调用
